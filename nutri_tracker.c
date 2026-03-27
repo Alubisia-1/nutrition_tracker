@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#define MAX_ENTRIES 100
+
+struct FoodEntry {
+  char name[50];
+  float quantity;
+};
+
+struct FoodEntry food[MAX_ENTRIES];
+int count = 0;
+
 
 void display_menu() {
     printf("=== Nutrion Tracker ===\n"
@@ -19,17 +29,35 @@ int get_choice() {
 }
 
 void food_entry() {
-  char food[50];
-
+  if(count >= MAX_ENTRIES) {
+    printf("Memory is Full!\n");
+  }
   printf("Enter Food/Snack already eaten: ");
-  fgets(food, sizeof(food), stdin);
-  food [strcspn(food, "\n")] = '\0';
+  fgets(food[count].name, sizeof(food[count].name), stdin);
+  food[count].name [strcspn(food[count].name, "\n")] = '\0';
 
-  printf("You entered: %s\n", food);
+  printf("Enter quantity: ");
+  scanf("%f", &food[count].quantity);
+  while(getchar() != '\n');
+
+  printf("Food succesfully Added");
+  printf("Name: %s\n", food[count].name);
+  //printf("Quantity: %.2f\n", food[count].quantity);
+  count++;
 }
 
 void view_entries() {
-  printf("No Entries yet!\n");
+  if (count == 0) {
+    printf("No Entries!");
+    return;
+  }
+  for(int i = 0; i < count; i++) {
+    printf("%d.%s %.2f\n",
+      i + 1,
+      food[i].name,
+      food[i].quantity
+    );
+  }
 }
 
 int main() {
