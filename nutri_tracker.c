@@ -6,6 +6,7 @@
 struct FoodEntry {
   char name[50];
   float quantity;
+  char unit[10]; // "ml" "g" "mg"
 };
 
 struct FoodEntry food[MAX_ENTRIES];
@@ -40,9 +41,12 @@ void food_entry() {
   scanf("%f", &food[count].quantity);
   while(getchar() != '\n');
 
+  printf("Enter unit (mg/g/pcs): ");
+  fgets(food[count].unit, sizeof(food[count].unit), stdin);
+  food[count].unit [strcspn(food[count].name, "\n")] = '\0';
+
   printf("Food succesfully Added");
   printf("Name: %s\n", food[count].name);
-  //printf("Quantity: %.2f\n", food[count].quantity);
   count++;
 }
 
@@ -52,10 +56,11 @@ void view_entries() {
     return;
   }
   for(int i = 0; i < count; i++) {
-    printf("%d.%s %.2f\n",
+    printf("%d.%s %.2f %s\n",
       i + 1,
       food[i].name,
-      food[i].quantity
+      food[i].quantity,
+      food[i].unit
     );
   }
 }
