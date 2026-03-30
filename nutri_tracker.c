@@ -29,9 +29,27 @@ int get_choice() {
   return choice;
 }
 
+int add_food(struct FoodEntry entry) {
+  FILE *file = fopen("Food.txt", "a");
+
+  if(!file) {
+    printf("Failed to write to file: Food.txt\n");
+    return 0;
+  }
+
+  fprintf(file, "%s %.2f %s\n",
+        entry.name,
+        entry.quantity,
+        entry.unit
+      );
+  fclose(file);
+  return 1;
+}
+
 void food_entry() {
   if(count >= MAX_ENTRIES) {
     printf("Memory is Full!\n");
+    return;
   }
   printf("Enter Food/Snack already eaten: ");
   fgets(food[count].name, sizeof(food[count].name), stdin);
@@ -43,10 +61,16 @@ void food_entry() {
 
   printf("Enter unit (mg/g/pcs): ");
   fgets(food[count].unit, sizeof(food[count].unit), stdin);
-  food[count].unit [strcspn(food[count].name, "\n")] = '\0';
+  food[count].unit [strcspn(food[count].unit, "\n")] = '\0';
 
   printf("Food succesfully Added");
   printf("Name: %s\n", food[count].name);
+
+  if(add_food(food[count])) {
+    printf("Food succesfully added\n");
+  } else {
+    printf("Failed to add Food\n");
+  };
   count++;
 }
 
