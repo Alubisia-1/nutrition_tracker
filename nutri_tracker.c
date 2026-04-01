@@ -46,6 +46,32 @@ int add_food(struct FoodEntry entry) {
   return 1;
 }
 
+int read_food() {
+  FILE *file = fopen("Food.txt", "r");
+  count = 0;
+
+  if(!file) {
+    printf("Failed to read file: Food.txt\n");
+    return 0;
+  }
+
+  while(fscanf(file, "%s %f %s",
+          food[count].name,
+          &food[count].quantity,
+          food[count].unit
+        ) == 3) {
+    count++;
+    if(count >= MAX_ENTRIES) break;
+  }
+  fclose(file);
+
+  if(count == 0) {
+    printf("No entries in the file: Food.txt\n");
+    return 0;
+  }
+    return 1;
+}
+
 void food_entry() {
   if(count >= MAX_ENTRIES) {
     printf("Memory is Full!\n");
@@ -75,12 +101,10 @@ void food_entry() {
 }
 
 void view_entries() {
-  if (count == 0) {
-    printf("No Entries!");
-    return;
-  }
+  if (!read_food()) return;
+
   for(int i = 0; i < count; i++) {
-    printf("%d.%s %.2f %s\n",
+    printf("%d. %s %.2f %s\n",
       i + 1,
       food[i].name,
       food[i].quantity,
