@@ -13,6 +13,47 @@ struct FoodEntry food[MAX_ENTRIES];
 int count = 0;
 
 
+struct Nutrition {
+  char name[50];
+  float protein;
+  float sugar;
+  float iron;
+};
+
+struct Nutrition nutrition_db[MAX_ENTRIES];
+int nutrition_count = 0;
+
+void load_nutrition_data() {
+  strcpy(nutrition_db[0].name, "rice");
+  nutrition_db[0].protein = 2.7;
+  nutrition_db[0].sugar = 0.1;
+  nutrition_db[0].iron = 1.2;
+  nutrition_count++;
+
+  strcpy(nutrition_db[1].name, "egg");
+  nutrition_db[1].protein = 13;
+  nutrition_db[1].sugar = 1.1;
+  nutrition_db[1].iron = 1.8;
+  nutrition_count++;
+
+  strcpy(nutrition_db[2].name, "milk");
+  nutrition_db[2].protein = 3.4;
+  nutrition_db[2].sugar = 5;
+  nutrition_db[2].iron = 0.03;
+  nutrition_count++;
+}
+
+void show_nutrition_db() {
+  for(int i; i < nutrition_count; i++) {
+    printf("%s Protein: %.2f Sugar: %.2f Iron: %.2f\n",
+          nutrition_db[i].name,
+          nutrition_db[i].protein,
+          nutrition_db[i].sugar,
+          nutrition_db[i].iron
+        );
+  }
+}
+
 void display_menu() {
     printf("=== Nutrion Tracker ===\n"
           "1. Add Food Entry\n"
@@ -115,6 +156,10 @@ void view_entries() {
 
 int main() {
   int choice;
+
+  load_nutrition_data();
+  show_nutrition_db();
+
   while (1) {
     display_menu();
 
