@@ -18,6 +18,8 @@ struct Nutrition {
   float protein;
   float sugar;
   float iron;
+  char user_unit[10];
+  float ref_unit;
 };
 
 struct Nutrition nutrition_db[MAX_ENTRIES];
@@ -28,23 +30,29 @@ void load_nutrition_data() {
   nutrition_db[0].protein = 2.7;
   nutrition_db[0].sugar = 0.1;
   nutrition_db[0].iron = 1.2;
+  strcpy(nutrition_db[0].user_unit, "g");
+  nutrition_db[0].ref_unit = 100;
   nutrition_count++;
 
-  strcpy(nutrition_db[1].name, "egg");
+  strcpy(nutrition_db[1].name, "eggs");
   nutrition_db[1].protein = 13;
   nutrition_db[1].sugar = 1.1;
   nutrition_db[1].iron = 1.8;
+  strcpy(nutrition_db[1].user_unit, "pcs");
+  nutrition_db[1].ref_unit = 1;
   nutrition_count++;
 
   strcpy(nutrition_db[2].name, "milk");
   nutrition_db[2].protein = 3.4;
   nutrition_db[2].sugar = 5;
   nutrition_db[2].iron = 0.03;
+  strcpy(nutrition_db[2].user_unit, "ml");
+  nutrition_db[2].ref_unit = 100;
   nutrition_count++;
 }
 
 void show_nutrition_db() {
-  for(int i; i < nutrition_count; i++) {
+  for(int i = 0; i < nutrition_count; i++) {
     printf("%s Protein: %.2f Sugar: %.2f Iron: %.2f\n",
           nutrition_db[i].name,
           nutrition_db[i].protein,
@@ -58,7 +66,9 @@ void display_menu() {
     printf("=== Nutrion Tracker ===\n"
           "1. Add Food Entry\n"
           "2. View Entries\n"
-          "3. Exit\n"
+          "3. View Nutrions Values for current entries\n"
+          "4. Calculate Nutrition\n"
+          "5. EXit\n"
       );
 }
 
@@ -130,11 +140,14 @@ void food_entry() {
   fgets(food[count].unit, sizeof(food[count].unit), stdin);
   food[count].unit [strcspn(food[count].unit, "\n")] = '\0';
 
+  /*
   printf("Food succesfully Added");
   printf("Name: %s\n", food[count].name);
+  */
 
   if(add_food(food[count])) {
     printf("Food succesfully added\n");
+    printf("Name: %s\n", food[count].name);
   } else {
     printf("Failed to add Food\n");
   };
@@ -154,11 +167,98 @@ void view_entries() {
   }
 }
 
+int find_nutrition(char food_name[]) {
+  for(int i = 0; i < nutrition_count; i++) {
+    if(strcmp(food_name, nutrition_db[i].name) == 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+void test_search() {
+ if(!read_food()) return;
+  for(int i = 0; i < count; i++) {
+    int index = find_nutrition(food[i].name);
+    if(index != -1) {
+    printf("%s Protein: %.2f Sugar: %.2f Iron: %.2f\n",
+            nutrition_db[index].name,
+            nutrition_db[index].protein,
+            nutrition_db[index].sugar,
+            nutrition_db[index].iron
+          );
+    } else {
+      printf("Food Not Found in Nutrition Database!\n");
+    } 
+  }
+}
+
+float convert_to_ref_unit(char food_name[], float quantity, char unit[]) {
+  if (strcmp(food_name, "rice") == 0) {
+    if(strcmp(unit, "g") == 0) return quantity;
+    if(strcmp(unit, "kg") == 0) return quantity * 1000;
+    if(strcmp(unit, "plate") == 0 || strcmp(unit, "plates") == 0) return quantity* 250;
+    if(strcmp(unit, "cup") == 0 || strcmp(unit, "cups") == 0) return quantity * 195;
+  }
+
+  if(strcmp(food_name, "milk") == 0) {
+    if(strcmp(unit, "ml") == 0) return quantity;
+    if(strcmp(unit, "l") == 0) return quantity * 1000;
+    if(strcmp(unit, "cup") == 0 || strcmp(unit, "cups") == 0) return quantity * 240;
+  }
+
+  if(strcmp(food_name, "eggs") == 0){
+    if(strcmp(unit, "pieces") == 0 || strcmp(unit, "pcs") == 0 || strcmp(unit, "piece") == 0) return quantity;
+  }
+
+  return -1;
+}
+
+void calculate_nutrition() {
+  if(!read_food()) return;
+  for(int i = 0; i < count; i++) {
+    int index = find_nutrition(food[i].name);
+    if(index != -1) {
+
+      float converted_quantity = convert_to_ref_unit(
+            food[i].name,
+            food[i].quantity,
+            food[i].unit
+          );
+
+      if(converted_quantity == -1) {
+        printf("%s: Unsupported quantity '%s'\n", food[i].name, food[i].unit);
+        continue;
+      }
+
+      //if(strcmp(food[i].unit, nutrition_db[index].user_unit) == 0) { 
+        float multiplier = converted_quantity / nutrition_db[index].ref_unit;
+        float actual_protein = nutrition_db[index].protein * multiplier;
+        float actual_sugar = nutrition_db[index].sugar * multiplier;
+        float actual_iron = nutrition_db[index].iron * multiplier;
+
+        printf("%s Protein: %.2f Sugar: %.2f Iron: %.2f\n",
+              nutrition_db[index].name,
+              actual_protein,
+              actual_sugar,
+              actual_iron
+            );
+    /*
+      } else {
+       printf("Units Do Not Match!\n");
+      }
+    */
+      }  else {
+        printf("Food Not Found!"); 
+     }
+    } 
+  }
+
 int main() {
   int choice;
 
   load_nutrition_data();
-  show_nutrition_db();
+  //show_nutrition_db(); 
 
   while (1) {
     display_menu();
@@ -170,12 +270,15 @@ int main() {
    } else if (choice == 2) {
      view_entries();
    } else if(choice == 3) {
+     test_search(); 
+   } else if (choice == 4) {
+     calculate_nutrition();
+   } else if (choice == 5) {
      printf("Exiting...!\n");
      break;
    } else {
      printf("Invalid Choice!");
    }
-  }
- 
+  } 
   return 0;
 }
