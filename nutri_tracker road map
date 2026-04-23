@@ -1,0 +1,56 @@
+14. The roadmap I would give you as a C tutor
+
+Here is the order I would use.
+
+Phase 1 — stabilize current program
+
+Do this first:
+
+normalize names and units,
+support singular/plural aliases,
+improve file format,
+add total nutrient summary,
+separate conversion data from code a little better.
+Phase 2 — redesign the data model
+
+Introduce:
+
+Food
+Serving
+Nutrient
+FoodNutrient
+Entry
+
+Even if still stored in plain files.
+
+Phase 3 — move storage to SQLite
+
+This is where the project becomes serious.
+
+Phase 4 — import real food data
+
+Either:
+
+USDA downloadable data, or
+API-based fetching.
+Phase 5 — improve usability
+
+Add:
+
+food search,
+suggestions,
+date-based logs,
+daily reports,
+update/delete entries,
+favorite foods,
+custom foods.
+Phase 6 — production polish
+
+Add:
+
+error handling,
+logging,
+tests,
+documentation,
+config file,
+separation into modules.

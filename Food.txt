@@ -1,3 +1,10 @@
 rice 2.00 plates
 eggs 2.00 pcs
 milk 2.00 cups
+3 5.00 5
+
+tomato 3.00 pieces
+
+milk 4.00 cups
+
+milk 2.00 cup

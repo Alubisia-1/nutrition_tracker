@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_ENTRIES 100
 
@@ -8,6 +9,93 @@ struct FoodEntry {
   float quantity;
   char unit[10]; // "ml" "g" "mg"
 };
+
+struct Alias {
+  char alias[50];
+  char canonical[50];
+};
+
+struct Alias food_aliases[] = {
+  {"egg", "egg"},
+  {"eggs", "egg"},
+  {"rice", "rice"},
+  {"milk", "milk"},
+  {"whole milk", "milk"},
+  {"tomatoes", "tomato"},
+  {"tomato", "tomato"}
+};
+
+int food_aliases_count = sizeof(food_aliases)/ sizeof(food_aliases[0]); // returns no of items
+
+void remove_newLine(char *str) {
+  str[strcspn(str, "\n")] = '\0';
+}
+
+void trim_spaces(char *str) {
+  int start = 0;
+  int end = strlen(str) - 1;
+  int i,j;
+
+  while (str[start] == ' ' || str[start] == '\t') {
+    start++;
+  };
+
+  while(end >= start && (str[end] == ' ' || str[end] == '\t')) {
+    end--;
+  };
+  
+  for (i = start, j=0; i <= end; i++, j++) {
+    str[j] = str[i];
+  };
+  str[j] = '\0';
+}
+
+void to_lowercase(char *str) {
+  for(int i = 0; str[i] != '\0'; i++) {
+    str[i] = tolower((unsigned char)str[i]);
+  }
+}
+
+void normalize_text(char *str) {
+  remove_newLine(str);
+  trim_spaces(str);
+  to_lowercase(str);
+}
+
+void canonicalizer(char *str, struct Alias aliases[], int count) {
+  for(int i = 0; i < count; i++) {
+    if(strcmp(str, aliases[i].alias) == 0) {
+      strcpy(str, aliases[i].canonical);
+      return;
+    }
+  }
+}
+
+struct Alias unit_aliases[] = {
+  {"kg", "kg"},
+  {"kilogram", "kg"},
+  {"kgs", "kg"},
+
+  {"ml", "ml"},
+  {"mililitres", "ml"},
+
+  {"l", "l"},
+  {"litres", "l"},
+
+  {"pcs", "piece"},
+  {"pieces", "piece"},
+  {"piece", "piece"},
+
+  {"cup", "cup"},
+  {"cups", "cup"},
+
+  {"g", "g"},
+  {"grams", "g"},
+  {"gram", "g"}
+};
+
+int unit_aliases_count = sizeof(unit_aliases)/ sizeof(unit_aliases[0]);
+
 
 struct FoodEntry food[MAX_ENTRIES];
 int count = 0;
@@ -130,7 +218,8 @@ void food_entry() {
   }
   printf("Enter Food/Snack already eaten: ");
   fgets(food[count].name, sizeof(food[count].name), stdin);
-  food[count].name [strcspn(food[count].name, "\n")] = '\0';
+  normalize_text(food[count].name);
+  canonicalizer(food[count].name, food_aliases, food_aliases_count);
 
   printf("Enter quantity: ");
   scanf("%f", &food[count].quantity);
@@ -138,12 +227,8 @@ void food_entry() {
 
   printf("Enter unit (mg/g/pcs): ");
   fgets(food[count].unit, sizeof(food[count].unit), stdin);
-  food[count].unit [strcspn(food[count].unit, "\n")] = '\0';
-
-  /*
-  printf("Food succesfully Added");
-  printf("Name: %s\n", food[count].name);
-  */
+  normalize_text(food[count].unit);
+  canonicalizer(food[count].unit, unit_aliases, unit_aliases_count);
 
   if(add_food(food[count])) {
     printf("Food succesfully added\n");
