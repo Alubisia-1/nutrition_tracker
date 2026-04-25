@@ -8,3 +8,4 @@ tomato 3.00 pieces
 milk 4.00 cups
 
 milk 2.00 cup
+egg 2.00 piece

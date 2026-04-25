@@ -4,26 +4,15 @@
 
 #define MAX_ENTRIES 100
 
-struct FoodEntry {
-  char name[50];
-  float quantity;
-  char unit[10]; // "ml" "g" "mg"
-};
-
 struct Alias {
   char alias[50];
   char canonical[50];
 };
 
-struct Alias food_aliases[] = {
-  {"egg", "egg"},
-  {"eggs", "egg"},
-  {"rice", "rice"},
-  {"milk", "milk"},
-  {"whole milk", "milk"},
-  {"tomatoes", "tomato"},
-  {"tomato", "tomato"}
-};
+struct Alias food_aliases[MAX_ENTRIES];
+//int food_aliases_count = 0;
+struct Alias unit_aliases[MAX_ENTRIES];
+//int unit_aliases_count = 0;
 
 int food_aliases_count = sizeof(food_aliases)/ sizeof(food_aliases[0]); // returns no of items
 
@@ -54,6 +43,43 @@ void to_lowercase(char *str) {
   for(int i = 0; str[i] != '\0'; i++) {
     str[i] = tolower((unsigned char)str[i]);
   }
+}
+
+int read_aliases(char filename[], struct Alias aliases[], int *aliasCount) {
+  FILE *file = fopen(filename, "r");
+  char line[100];
+
+  *aliasCount = 0;
+
+  if(!file) {
+    printf("Failed to read file: %s\n", filename);
+    return 0;
+  }
+
+  while(fgets(line, sizeof(line), file)) {
+      remove_newLine(line);
+
+      char *alias = strtok (line, ",");
+      char *canonical = strtok (NULL, ",");
+
+      if(alias && canonical) {
+        trim_spaces(alias);
+        trim_spaces(canonical);
+        to_lowercase(alias);
+        to_lowercase(canonical);
+
+        strcpy(aliases[*aliasCount].alias, alias);
+        strcpy(aliases[*aliasCount].canonical, canonical);
+
+        (*aliasCount)++;
+        if(*aliasCount >= MAX_ENTRIES) break;
+      }
+    }
+  if(*aliasCount == 0) {
+    printf("No entries in file: %s\n", filename);
+    return 0;
+  }
+  return 1;
 }
 
 void normalize_text(char *str) {
@@ -95,10 +121,6 @@ struct Alias unit_aliases[] = {
 };
 
 int unit_aliases_count = sizeof(unit_aliases)/ sizeof(unit_aliases[0]);
-
-
-struct FoodEntry food[MAX_ENTRIES];
-int count = 0;
 
 
 struct Nutrition {
@@ -167,6 +189,15 @@ int get_choice() {
   getchar();
   return choice;
 }
+
+struct FoodEntry {
+  char name[50];
+  float quantity;
+  char unit[10]; // "ml" "g" "mg"
+};
+
+struct FoodEntry food[MAX_ENTRIES];
+int count = 0;
 
 int add_food(struct FoodEntry entry) {
   FILE *file = fopen("Food.txt", "a");
@@ -342,8 +373,9 @@ void calculate_nutrition() {
 int main() {
   int choice;
 
+  read_aliases("food_aliases.txt", food_aliases, &food_aliases_count);
+  read_aliases("unit_aliases.txt", unit_aliases, &unit_aliases_count);
   load_nutrition_data();
-  //show_nutrition_db(); 
 
   while (1) {
     display_menu();

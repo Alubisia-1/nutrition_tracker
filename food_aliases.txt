@@ -1,0 +1,7 @@
+egg,egg
+eggs,egg
+rice,rice
+milk,milk
+whole milk,milk
+tomato,tomato
+tomatoes,tomato
